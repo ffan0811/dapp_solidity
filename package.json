@@ -1,0 +1,9 @@
+{
+	"name": "chapter4-building-blockchain-projects",
+	"dependencies": {
+		"express": "^4.16.3",
+		"jquery": "^3.3.1",
+		"socket.io": "1.6.0",
+		"web3": "0.16.0"
+	}
+}

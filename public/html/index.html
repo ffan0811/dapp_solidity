@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Transfer Sample</title>
+    <script type="text/javascript" src="../js/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+    <!-- <script type="text/javascript" src="/js/main.js"></script> -->
+</head>
+<body>
+<h2>Contract</h2>
+<div>
+    <div>
+        <textarea id="_log" rows="7" cols="80"></textarea>
+    </div>
+    <h3>Create</h3>
+    <button id="btnCreate">Create</button>
+    <h3>At</h3>
+    <input type="text" id="_contractAddress" size="20"/><button id="btnAt">At</button>
+
+    <h3>New Campaign</h3>
+    Beneficiery : <input type="text" id="_beneficiery" size="40"/><br/>
+    Goal (ether): <input type="text" id="_goal" size="20"/><br/>
+    <button id="btnNewCampaign">New Campaign</button>
+
+    <h3>Contribute</h3>
+    Campaign ID : <input type="text" id="_contributeCampaignID" size="5"/><br/>
+    Amount (ether) : <input type="text" id="_contributeEther" size="20"/><br/>
+    <button id="btnContribute">Contribute</button>
+
+     <h3>Goal Reached Check</h3>
+    Campaign ID : <input type="text" id="_checkCampaignID" size="5"/><br/>
+    Is Reached : <input type="text" id="_checkResult" size="5" readonly/><br/>
+    Goal : <input type="text" id="_checkGoal" size="20" readonly/> Ether <br/>
+    Current Amount : <input type="text" id="_checkAmount" size="20" readonly/> Ether <br/>
+    <button id="btnCheck">Check(call)</button><button id="btnCheck_Tx">Check(send)</button>
+</div>
+<script type="text/javascript">
+
+
+
+    var Web3 = require("web3");
+    var web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:6845"));
+
+    var code = "0x608060405234801561001057600080fd5b5061047f806100206000396000f300608060405260043610610057576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff1680635b2329d414610069578063c1cbbca7146100bc578063f7572cf3146100dc575b34801561006357600080fd5b50600080fd5b34801561007557600080fd5b506100946004803603810190808035906020019092919050505061013d565b6040518084151515158152602001838152602001828152602001935050505060405180910390f35b6100da60048036038101908080359060200190929190505050610269565b005b3480156100e857600080fd5b50610127600480360381019080803573ffffffffffffffffffffffffffffffffffffffff16906020019092919080359060200190929190505050610384565b6040518082815260200191505060405180910390f35b600080600080600160008681526020019081526020016000209050806001015492508060030154915080600101548160030154101561017f5760009350610261565b8060000160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff166108fc82600301549081150290604051600060405180830381858888f193505050501515610252578060000160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff166108fc82600301549081150290604051600060405180830381858888f19350505050158015610250573d6000803e3d6000fd5b505b60019350600081600301819055505b509193909250565b600060016000838152602001908152602001600020905060008160000160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1614156102c857600080fd5b60408051908101604052803373ffffffffffffffffffffffffffffffffffffffff1681526020013481525081600401600083600201600081548092919060010191905055815260200190815260200160002060008201518160000160006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff160217905550602082015181600101559050503481600301600082825401925050819055505050565b60008060008154809291906001019190505590506080604051908101604052808473ffffffffffffffffffffffffffffffffffffffff1681526020018381526020016000815260200160008152506001600083815260200190815260200160002060008201518160000160006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff160217905550602082015181600101556040820151816002015560608201518160030155905050929150505600a165627a7a72305820fcf1690b9891750758595cee84af6e83725797c9afe5d52d2153238f9bb1deb60029";
+    var abi = [{"constant": false,"inputs": [{"name": "_campaignId","type": "uint256"}],"name": "checkGoalReached","outputs": [{"name": "reached_","type": "bool"},{"name": "goal_","type": "uint256"},{"name": "amount_","type": "uint256"}],"payable": false,"stateMutability": "nonpayable","type": "function"},{"constant": false,"inputs": [{"name": "_campaignId","type": "uint256"}],"name": "contribute","outputs": [],"payable": true,"stateMutability": "payable","type": "function"},{"constant": false,"inputs": [{"name": "_beneficiary","type": "address"},{"name": "_goal","type": "uint256"}],"name": "newCampaign","outputs": [{"name": "campaignId_","type": "uint256"}],"payable": false,"stateMutability": "nonpayable","type": "function"},{"payable": false,"stateMutability": "nonpayable","type": "fallback"}];
+    var Contract = web3.eth.contract(abi);
+    var crowd = null;
+
+    function _log(content) {
+        var field = $("#_log").val();
+        $("#_log").val(field + "\n" + content);
+        $("#_log").scrollTop($("#_log")[0].scrollHeight);
+    }
+
+    $(document).ready(function() {
+
+        $("#_log").val("");
+        _log("waiting for unlock...");
+        
+
+        web3.personal.unlockAccount(web3.eth.accounts[0],'kyotree20.');
+        console.log("UNLOCKED");
+        _log("unlocked");
+
+        $('#btnCreate').click(function(){
+                crowd = Contract.new({
+                data:code,
+                gas:2000000,
+                from:web3.eth.accounts[0]
+            }, function (error, contract) {
+                if (!error) {
+                    if (!contract.address) {
+                        _log("Creating Contract " + contract.transactionHash)
+                        console.log("Creating Contract", contract.transactionHash);
+                    } else {
+                        address = contract.address;
+                        _log("Contract Deployed " + contract.address)
+                        console.log("Contract Deployed", contract.address);
+                    }
+                } else
+                    // _log(error);
+                    console.error(error);
+            });
+        });
+
+        $('#btnAt').click(function(){
+            var address = $('#_contractAddress').val();
+            crowd = Contract.at(address);
+            _log("saved");
+        });
+
+        $('#btnNewCampaign').click(function(){
+            var beneficiery = $('#_beneficiery').val();
+            var goalAmountWei = web3.toWei($('#_goal').val(), 'ether');
+            var campaignID = crowd.newCampaign.call(beneficiery, goalAmountWei, {
+                from:web3.eth.accounts[0]
+            });
+            _log("newCampaign : " + beneficiery + '\n'
+                + 'amount : ' + goalAmountWei + '\n'
+                + 'ID : ' + campaignID);
+            console.log("newCampaign : " + beneficiery + '\n'
+                + 'amount : ' + goalAmountWei + '\n'
+                + 'ID : ' + campaignID);
+            var txHash = crowd.newCampaign.sendTransaction(beneficiery, goalAmountWei, {
+                from:web3.eth.accounts[0],
+                gas:500000
+            });
+            _log("newCampaignTxHash :  " + txHash)
+            console.log("newCampaignTxHash : ", txHash);
+        });
+
+        $('#btnContribute').click(function(){
+            var campaignID = $('#_contributeCampaignID').val();
+            var contributeAmountWei = web3.toWei($('#_contributeEther').val(), "ether");
+            var txHash = crowd.contribute(campaignID, {
+                from:web3.eth.accounts[0],
+                gas:500000,
+                value:contributeAmountWei
+            });
+            _log("contribute TX Hash :  " + txHash)
+            console.log("contribute TX Hash : ", txHash);
+        });
+
+        $('#btnCheck').click(function(){
+            var campaignID = $('#_checkCampaignID').val();
+            var checkResult = crowd.checkGoalReached.call(campaignID, {
+                from:web3.eth.accounts[1]
+            });
+            console.log(campaignID);
+            console.log(checkResult);
+            $('#_checkResult').val(checkResult[0]);
+            $('#_checkGoal').val(web3.fromWei(checkResult[1], "ether"));
+            $('#_checkAmount').val(web3.fromWei(checkResult[2], "ether"));
+        });
+
+        $('#btnCheck_Tx').click(function(){
+            var campaignID = $('#_checkCampaignID').val();
+            var txHash = crowd.checkGoalReached.sendTransaction(campaignID, {
+                from:web3.eth.accounts[0],
+                gas:2000000
+            });
+            _log("checkTx TX Hash :  " + txHash);
+            console.log("checkTx TX Hash : " , txHash);
+        });
+
+    });
+</script>
+</body>
+</html>
