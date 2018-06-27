@@ -3,7 +3,7 @@
 - This dapp should be running in a private network.
 - I've worked on this in Ubuntu, Linux.
 
-## Using GETH
+## Setting private network with GETH
 
 ### 1. Install GETH
 ```
@@ -73,7 +73,7 @@ admin.peers
 ```
 - - -
 
-## Setting
+## Setting for dapp
 
 ### 1. Install nodejs
 ```
