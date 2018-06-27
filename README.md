@@ -1,7 +1,7 @@
 # dapp_solidity
-Created a dapp for getting used to solidity.
-This dapp should be running in a private network.
-Ive worked on this in Ubuntu, Linux.
+- Created a dapp for getting used to solidity.
+- This dapp should be running in a private network.
+- I've worked on this in Ubuntu, Linux.
 
 ## Using GETH
 
